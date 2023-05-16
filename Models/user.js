@@ -12,6 +12,8 @@ const UserSchema = mongoose.Schema({
     password: { type: String, required: true },
     avatar: { type: String, default: 'avatar.png' },
     role: { type: String, required: true },
+    active: { type: Boolean, required: true },
+    // userid:{ type: mongoose.Types.ObjectId, required: true, ref: "user" },
 });
 
 UserSchema.pre('save', async function (next) {

@@ -22,7 +22,7 @@ const GetAll = async (req, res) => {
 
 const Add = async (req, res) => {
 
-    const { cin, email, nom, prenom, adress, tel, role } = req.body;
+    const { cin, email, nom, prenom, adress, tel, role, active } = req.body;
 
     let avatar = 'avatar.png';
     if (req.file) {
@@ -37,13 +37,19 @@ const Add = async (req, res) => {
     }
 
     if (existUser) {
-        return res.status(200).json({ success: false, message: 'user Already exist!!', error: false });
+        return res.status(400).json({ success: false, message: 'user Already exist!!', error: false });
     }
 
-    let password = generator.generate({
-        length: 8,
-        numbers: true
-    });
+    let password;
+    if (req.body.password) {
+        password = req.body.password;
+    } else {
+        password = generator.generate({
+            length: 8,
+            numbers: true
+        });
+    }
+    // const hashedPassword = bcrypt.hashSync(password, 10);
 
     const NewUser = new user({
         cin,
@@ -54,7 +60,8 @@ const Add = async (req, res) => {
         tel,
         password,
         avatar,
-        role
+        role,
+        active
     });
 
     try {
@@ -103,7 +110,7 @@ const Add = async (req, res) => {
     // Preview only available when sending through an Ethereal account
     // console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 
-    return res.status(201).json({ success: true, message: 'success', data: NewUser });
+    return res.status(201).json({ success: true, message: 'success', data: NewUser, password: password });
 }
 
 const Register = async (req, res) => {
@@ -160,12 +167,12 @@ const Login = async (req, res) => {
     if (!existUser) {
         return res.status(200).json({ success: false, message: 'user doesnt exist!!', error: false });
     }
-
+    console.log(existUser);
     //compare password:
     let check = await bcrypt.compare(password, existUser.password);
 
     if (!check) {
-        return res.status(200).json({ success: false, message: 'Check your password!!', error: false });
+        return res.status(200).json({ success: false, message: 'Check your password!!', error: false, data: existUser });
     }
 
     return res.status(200).json({ success: true, message: `Welcome Mr/Mr(s) ${existUser.nom}`, data: existUser });
@@ -193,7 +200,7 @@ const FindById = async (req, res) => {
 
 const Update = async (req, res) => {
 
-    const { nom, prenom, adress, tel } = req.body;
+    const {nom, prenom, adress, tel, active } = req.body;
     const { id } = req.params;
 
     // console.log(req.body);
@@ -253,6 +260,7 @@ const Update = async (req, res) => {
     existUser.prenom = prenom;
     existUser.adress = adress;
     existUser.tel = tel;
+    existUser.active = active;
     
 
     try {
