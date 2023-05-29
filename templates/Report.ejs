@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Report</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><%= iso %> Report</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Answer</th>
+          <th>Conclusion</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% responses.forEach((response) => { %>
+        <tr>
+          <td><%= response.questionid.question %></td>
+          <td><%= response.response %></td>
+          <% if (response.response === 'non' ) { %>
+          <td><%= response.conclusion %></td>
+          <% } else { %>
+          <td>------</td>
+          <% } %> 
+          <% if (response.response === 'non' ) { %>
+          <td><%= response.recommendation %></td>
+          <% } else { %>
+          <td>------</td>
+          <% } %>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </body>
+</html>
