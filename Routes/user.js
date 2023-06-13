@@ -8,11 +8,13 @@ route.get('/', UserController.GetAll);
 
 route.get('/:id', UserController.FindById);
 
-route.put('/:id',fileuploader.single('avatar'), UserController.Update);
+route.put('/:id', fileuploader.single('avatar'), UserController.Update);
 
 route.delete('/:id', UserController.Delete);
 
 route.post('/register', UserController.Register);
+
+route.post('/lock/:id', UserController.Lock);
 
 route.post('/login', UserController.Login);
 

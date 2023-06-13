@@ -71,7 +71,7 @@ const Add = async (req, res) => {
     }
 
     // let testAccount = await nodemailer.createTestAccount();
-    
+
 
     var transporter = nodemailer.createTransport({
         // host: "smtp.mailtrap.io",
@@ -115,8 +115,7 @@ const Add = async (req, res) => {
 
 const Register = async (req, res) => {
 
-    const { cin, email, nom, prenom, adress, tel, password, avatar, role } = req.body;
-
+    const { cin, email, nom, prenom, adress, tel, password } = req.body;
 
     let existUser
     try {
@@ -129,8 +128,6 @@ const Register = async (req, res) => {
         return res.status(200).json({ success: false, messgae: 'user Already exist!!', error: false });
     }
 
-    // const hashedPassword = await bcrypt.hash(password, 10);
-
     const NewUser = new user({
         cin,
         email,
@@ -138,9 +135,9 @@ const Register = async (req, res) => {
         prenom,
         adress,
         tel,
-        password: "secret",
-        avatar,
-        role: "employer"
+        password,
+        avatar: 'avatar.png',
+        role: "client"
     });
 
     try {
@@ -200,7 +197,7 @@ const FindById = async (req, res) => {
 
 const Update = async (req, res) => {
 
-    const {nom, prenom, adress, tel, active } = req.body;
+    const { nom, prenom, adress, tel, active } = req.body;
     const { id } = req.params;
 
     // console.log(req.body);
@@ -231,15 +228,17 @@ const Update = async (req, res) => {
         hashedPassword = await bcrypt.hash(req.body.newpassword, salt);
         existUser.password = hashedPassword;
     }
-    
+
     if (req.file) {
-        let path = `./uploads/images/${existUser.avatar}`;
-        try {
-            fs.unlinkSync(path)
-            //file removed
-        } catch (error) {
-            console.log(error);
-            return res.status(500).json({ success: false, message: error, error: error })
+        if (existUser.avatar && existUser.avatar !== "avatar.png") {
+            let path = `./uploads/images/${existUser.avatar}`;
+            try {
+                fs.unlinkSync(path);
+                //file removed
+            } catch (error) {
+                console.log(error);
+                return res.status(500).json({ success: false, message: error, error: error })
+            }
         }
         existUser.avatar = req.file.filename;
     }
@@ -261,7 +260,36 @@ const Update = async (req, res) => {
     existUser.adress = adress;
     existUser.tel = tel;
     existUser.active = active;
-    
+
+
+    try {
+        await existUser.save();
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'something when wrong while extracting data', error: error.errors })
+    }
+
+    return res.status(200).json({ success: true, message: 'success', data: existUser });
+}
+
+const Lock = async (req, res) => {
+
+    const { active } = req.body;
+    const { id } = req.params;
+
+    // console.log(req.body);
+
+    let existUser
+    try {
+        existUser = await user.findById(id);
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'something when wrong while extracting data', error: error })
+    }
+
+    if (!existUser) {
+        return res.status(200).json({ success: false, messgae: 'user doesnt exist!!', error: false });
+    }
+
+    existUser.active = active;
 
     try {
         await existUser.save();
@@ -287,7 +315,8 @@ const Delete = async (req, res) => {
         return res.status(200).json({ success: false, messge: 'user doesnt exist!!', error: false });
     }
 
-    if (req.file) {
+    if (req.file && existUser.avatar && existUser.avatar !== "avatar.png") {
+
         let path = `./uploads/images/${existUser.avatar}`;
         try {
             fs.unlinkSync(path)
@@ -313,4 +342,5 @@ exports.Register = Register
 exports.Login = Login
 exports.FindById = FindById
 exports.Update = Update
+exports.Lock = Lock
 exports.Delete = Delete
