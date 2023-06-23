@@ -1,6 +1,7 @@
 const iso = require('../Models/iso');
 const pratique = require('../Models/pratique');
 const question = require('../Models/question');
+const response = require('../Models/response');
 
 const GetAll = async (req, res) => {
 
@@ -146,6 +147,7 @@ const Delete = async (req, res) => {
 
     try {
         await existquestion.deleteOne();
+        await response.deleteMany({ responseids: id });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'something when wrong while extracting data', error: error })
     }

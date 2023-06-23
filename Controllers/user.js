@@ -164,6 +164,10 @@ const Login = async (req, res) => {
     if (!existUser) {
         return res.status(200).json({ success: false, message: 'user doesnt exist!!', error: false });
     }
+    
+    if (!existUser.active) {
+        return res.status(200).json({ success: false, message: 'Your account isnt activated yet!!', error: false });
+    }
     console.log(existUser);
     //compare password:
     let check = await bcrypt.compare(password, existUser.password);
